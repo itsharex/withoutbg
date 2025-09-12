@@ -22,6 +22,20 @@ withoutbg image.jpg
 withoutbg image.jpg --api-key sk_your_api_key
 ```
 
+## ✨ Visual Examples
+
+See the power of AI background removal in action:
+
+![Woman with confetti - before and after](examples/images/woman-golden-hour.jpg)
+
+![Dog portrait - before and after](examples/images/dog-mugshot.jpg)
+
+![Pizza product - before and after](examples/images/pizza-parody.jpg)
+
+![Feather detail - before and after](examples/images/feather.jpg)
+
+*Perfect edge detection, hair details, and transparent backgrounds*
+
 ## 📦 Model Tiers
 
 | Tier | Quality | Usage | License |
