@@ -7,14 +7,15 @@ from PIL import Image
 
 from .api import StudioAPI
 from .exceptions import WithoutBGError
-from .models import SnapModel
+from .models import OpenSourceModel
 
 
 def remove_background(
     input_image: Union[str, Path, Image.Image, bytes],
     output_path: Optional[Union[str, Path]] = None,
     api_key: Optional[str] = None,
-    model_name: str = "snap",
+    model_name: str = "opensource",
+    progress_callback: Optional[callable] = None,
     **kwargs: Any,
 ) -> Image.Image:
     """Remove background from an image.
@@ -22,32 +23,33 @@ def remove_background(
     Args:
         input_image: Input image as file path, PIL Image, or bytes
         output_path: Optional path to save the result
-        api_key: API key for Studio service (uses local Snap model if None)
-        model_name: Model to use ("snap" for local, "studio" for API)
+        api_key: API key for Studio service (uses local Open Source model if None)
+        model_name: Model to use ("opensource" for local, "api" for API)
+        progress_callback: Optional callback function for progress updates (progress)
         **kwargs: Additional arguments passed to the model/API
 
     Returns:
         PIL Image with background removed
 
     Examples:
-        >>> # Local processing with Snap model
+        >>> # Local processing with Open Source model
         >>> result = remove_background("input.jpg")
 
-        >>> # Cloud processing with Studio API
+        >>> # Cloud processing with API
         >>> result = remove_background("input.jpg", api_key="sk_...")
 
         >>> # Save result directly
         >>> remove_background("input.jpg", output_path="output.png")
     """
     try:
-        if api_key or model_name == "studio":
-            # Use Studio API
+        if api_key or model_name == "api":
+            # Use API
             api = StudioAPI(api_key)
-            result = api.remove_background(input_image, **kwargs)
+            result = api.remove_background(input_image, progress_callback=progress_callback, **kwargs)
         else:
-            # Use local Snap model
-            model = SnapModel()
-            result = model.remove_background(input_image, **kwargs)
+            # Use local Open Source model
+            model = OpenSourceModel()
+            result = model.remove_background(input_image, progress_callback=progress_callback, **kwargs)
 
         if output_path:
             result.save(output_path)
@@ -62,7 +64,7 @@ def remove_background_batch(
     input_images: list[Union[str, Path, Image.Image, bytes]],
     output_dir: Optional[Union[str, Path]] = None,
     api_key: Optional[str] = None,
-    model_name: str = "snap",
+    model_name: str = "opensource",
     **kwargs: Any,
 ) -> list[Image.Image]:
     """Remove background from multiple images.
@@ -70,7 +72,7 @@ def remove_background_batch(
     Args:
         input_images: List of input images
         output_dir: Directory to save results (optional)
-        api_key: API key for Studio service
+        api_key: API key for API service
         model_name: Model to use
         **kwargs: Additional arguments
 

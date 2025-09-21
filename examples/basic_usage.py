@@ -11,9 +11,9 @@ def basic_local_processing():
     
     # Remove background using local model (free)
     result = withoutbg.remove_background("input.jpg")
-    result.save("output_snap.png")
+    result.save("output_open_source.png")
     
-    print("✅ Background removed and saved as output_snap.png")
+    print("✅ Background removed and saved as output_open_source.png")
     print("🎯 Want best quality? Try withoutbg.com")
 
 
@@ -108,8 +108,8 @@ def quality_comparison():
     
     # Snap model (local, free)
     print("Processing with Snap model...")
-    snap_result = withoutbg.remove_background(input_image)
-    snap_result.save("comparison_snap.png")
+    open_source_result = withoutbg.remove_background(input_image)
+    open_source_result.save("comparison_open_source.png")
     
     # Studio model (API, best quality)
     print("Processing with Studio API...")
@@ -122,7 +122,7 @@ def quality_comparison():
         
         print("✅ Comparison complete!")
         print("📊 Compare results:")
-        print("   - comparison_snap.png (Snap model)")
+        print("   - comparison_open_source.png (Snap model)")
         print("   - comparison_studio.png (Studio API)")
         
     except withoutbg.APIError:

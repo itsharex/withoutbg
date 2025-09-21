@@ -9,7 +9,7 @@ from PIL import Image
 
 from withoutbg.core import remove_background
 from withoutbg.exceptions import ModelNotFoundError, WithoutBGError
-from withoutbg.models import SnapModel
+from withoutbg.models import OpenSourceModel
 
 
 def assert_alpha_channel_valid(result_image: Image.Image) -> None:
@@ -102,10 +102,10 @@ def assert_images_similar(
 
 
 @pytest.fixture(scope="session")
-def real_snap_model() -> Optional[SnapModel]:
+def real_opensource_model() -> Optional[OpenSourceModel]:
     """Load actual ONNX models if available, skip if not."""
     try:
-        model = SnapModel()
+        model = OpenSourceModel()
         # Verify models actually loaded
         assert model.depth_session is not None, "Depth model not loaded"
         assert model.matting_session is not None, "Matting model not loaded"
@@ -125,14 +125,14 @@ class TestRealImageProcessing:
     """Integration tests using actual ONNX models and real images."""
 
     def test_ice_cream_processing(
-        self, real_snap_model, test_images_dir, expected_outputs_dir
+        self, real_opensource_model, test_images_dir, expected_outputs_dir
     ):
         """Test processing the ice cream image with real models."""
         input_path = test_images_dir / "test-ice-cream.png"
         assert input_path.exists(), f"Test image not found: {input_path}"
 
         # Process with real model
-        result = real_snap_model.remove_background(input_path)
+        result = real_opensource_model.remove_background(input_path)
 
         # Validate result properties
         assert_alpha_channel_valid(result)
@@ -156,27 +156,27 @@ class TestRealImageProcessing:
         original = Image.open(input_path)
         assert result.size == original.size
 
-    def test_different_input_formats(self, real_snap_model, test_images_dir):
+    def test_different_input_formats(self, real_opensource_model, test_images_dir):
         """Test processing with different input formats."""
         input_path = test_images_dir / "test-ice-cream.png"
         original_image = Image.open(input_path)
 
         # Test with PIL Image
-        result_pil = real_snap_model.remove_background(original_image)
+        result_pil = real_opensource_model.remove_background(original_image)
         assert_alpha_channel_valid(result_pil)
 
         # Test with file path (string)
-        result_path = real_snap_model.remove_background(str(input_path))
+        result_path = real_opensource_model.remove_background(str(input_path))
         assert_alpha_channel_valid(result_path)
 
         # Test with Path object
-        result_pathobj = real_snap_model.remove_background(input_path)
+        result_pathobj = real_opensource_model.remove_background(input_path)
         assert_alpha_channel_valid(result_pathobj)
 
         # Test with bytes
         with open(input_path, "rb") as f:
             image_bytes = f.read()
-        result_bytes = real_snap_model.remove_background(image_bytes)
+        result_bytes = real_opensource_model.remove_background(image_bytes)
         assert_alpha_channel_valid(result_bytes)
 
         # All results should have same dimensions
@@ -196,7 +196,7 @@ class TestRealImageProcessing:
         ],
     )
     def test_different_image_formats(
-        self, real_snap_model, sample_test_image, format_name, pil_format
+        self, real_opensource_model, sample_test_image, format_name, pil_format
     ):
         """Test processing various image formats."""
         # Convert test image to RGB for JPEG compatibility
@@ -213,7 +213,7 @@ class TestRealImageProcessing:
         buffer.seek(0)
 
         # Process the formatted image
-        result = real_snap_model.remove_background(buffer.getvalue())
+        result = real_opensource_model.remove_background(buffer.getvalue())
         assert_alpha_channel_valid(result)
 
     @pytest.mark.parametrize(
@@ -225,7 +225,7 @@ class TestRealImageProcessing:
             (1024, 768),  # Large landscape
         ],
     )
-    def test_different_resolutions(self, real_snap_model, size):
+    def test_different_resolutions(self, real_opensource_model, size):
         """Test processing different image sizes."""
         # Create test image with specific size
         test_img = Image.new("RGB", size, color=(128, 64, 192))
@@ -239,30 +239,30 @@ class TestRealImageProcessing:
         img_array[:, :, 0] = gradient[None, :]  # Horizontal gradient in red channel
         test_img = Image.fromarray(img_array)
 
-        result = real_snap_model.remove_background(test_img)
+        result = real_opensource_model.remove_background(test_img)
 
         # Should preserve original dimensions
         assert result.size == size
         assert_alpha_channel_valid(result)
 
-    def test_processing_consistency(self, real_snap_model, test_images_dir):
+    def test_processing_consistency(self, real_opensource_model, test_images_dir):
         """Test that multiple runs produce consistent results."""
         input_path = test_images_dir / "test-ice-cream.png"
 
         # Process same image multiple times
-        result1 = real_snap_model.remove_background(input_path)
-        result2 = real_snap_model.remove_background(input_path)
+        result1 = real_opensource_model.remove_background(input_path)
+        result2 = real_opensource_model.remove_background(input_path)
 
         # Results should be identical (deterministic) - perfect IoU
         iou = calculate_alpha_iou(result1, result2)
         assert iou == 1.0, f"Processing not deterministic: IoU={iou:.6f} < 1.0"
 
-    def test_pipeline_stages_integration(self, real_snap_model, test_images_dir):
+    def test_pipeline_stages_integration(self, real_opensource_model, test_images_dir):
         """Test that the 3-stage pipeline produces reasonable outputs."""
         input_path = test_images_dir / "test-ice-cream.png"
         original = Image.open(input_path)
 
-        result = real_snap_model.remove_background(original)
+        result = real_opensource_model.remove_background(original)
 
         # Validate the result has expected characteristics for ice cream image
         result_array = np.array(result)
@@ -280,14 +280,14 @@ class TestRealImageProcessing:
         assert very_opaque > 100, "Not enough foreground preservation"
 
     def test_alpha_iou_metric(
-        self, real_snap_model, test_images_dir, expected_outputs_dir
+        self, real_opensource_model, test_images_dir, expected_outputs_dir
     ):
         """Test alpha IoU metric calculation and interpretation."""
         input_path = test_images_dir / "test-ice-cream.png"
         expected_path = expected_outputs_dir / "test-ice-cream.png"
 
         # Process image
-        result = real_snap_model.remove_background(input_path)
+        result = real_opensource_model.remove_background(input_path)
 
         if expected_path.exists():
             expected = Image.open(expected_path)
@@ -314,15 +314,15 @@ class TestRealImageProcessing:
             print(f"Union pixels: {union}")
             print(f"IoU = {intersection}/{union} = {intersection/union:.4f}")
 
-    def test_error_handling_with_real_model(self, real_snap_model):
+    def test_error_handling_with_real_model(self, real_opensource_model):
         """Test error handling with real models."""
         # Test with invalid input
         with pytest.raises((WithoutBGError, ValueError, TypeError)):
-            real_snap_model.remove_background(None)
+            real_opensource_model.remove_background(None)
 
         # Test with invalid file path
         with pytest.raises((FileNotFoundError, WithoutBGError)):
-            real_snap_model.remove_background("/nonexistent/file.png")
+            real_opensource_model.remove_background("/nonexistent/file.png")
 
 
 @pytest.mark.performance
@@ -331,7 +331,7 @@ class TestRealProcessingPerformance:
     """Performance tests for real image processing."""
 
     def test_processing_speed_benchmark(
-        self, real_snap_model, test_images_dir, performance_tracker
+        self, real_opensource_model, test_images_dir, performance_tracker
     ):
         """Benchmark processing speed with real models."""
         input_path = test_images_dir / "test-ice-cream.png"
@@ -339,7 +339,7 @@ class TestRealProcessingPerformance:
         import time
 
         start_time = time.time()
-        result = real_snap_model.remove_background(input_path)
+        result = real_opensource_model.remove_background(input_path)
         processing_time = time.time() - start_time
 
         # Record performance metric
@@ -355,7 +355,7 @@ class TestRealProcessingPerformance:
             message=f"Processing too slow: {processing_time:.2f}s",
         )
 
-    def test_memory_usage_real_processing(self, real_snap_model, test_images_dir):
+    def test_memory_usage_real_processing(self, real_opensource_model, test_images_dir):
         """Test memory usage during real processing."""
         import os
 
@@ -365,7 +365,7 @@ class TestRealProcessingPerformance:
         memory_before = process.memory_info().rss / 1024 / 1024  # MB
 
         input_path = test_images_dir / "test-ice-cream.png"
-        result = real_snap_model.remove_background(input_path)
+        result = real_opensource_model.remove_background(input_path)
 
         memory_after = process.memory_info().rss / 1024 / 1024  # MB
         memory_increase = memory_after - memory_before

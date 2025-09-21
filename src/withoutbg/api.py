@@ -115,12 +115,13 @@ class StudioAPI:
         return rgba_image
 
     def remove_background(
-        self, input_image: Union[str, Path, Image.Image, bytes], **kwargs: Any
+        self, input_image: Union[str, Path, Image.Image, bytes], progress_callback: Optional[callable] = None, **kwargs: Any
     ) -> Image.Image:
         """Remove background using Studio API.
 
         Args:
             input_image: Input image
+            progress_callback: Optional callback function for progress updates (progress)
             **kwargs: Additional API parameters
 
         Returns:
@@ -133,6 +134,9 @@ class StudioAPI:
             raise APIError("API key required for Studio service")
 
         try:
+            if progress_callback:
+                progress_callback(0.1)
+            
             # Store original image for local alpha application
             if isinstance(input_image, (str, Path)):
                 with Image.open(input_image) as img:
@@ -146,15 +150,21 @@ class StudioAPI:
                 raise APIError(f"Unsupported image type: {type(input_image)}")
 
             # Resize image for API transmission to optimize latency
+            if progress_callback:
+                progress_callback(0.2)
             api_image, original_size = self._resize_for_api(original_image)
 
             # Encode resized image
+            if progress_callback:
+                progress_callback(0.3)
             encoded_image = self._encode_image(api_image)
 
             # Prepare request for base64 endpoint
             payload = {"image_base64": encoded_image}
 
             # Make API request to base64 endpoint
+            if progress_callback:
+                progress_callback(0.5)
             response = self.session.post(
                 f"{self.base_url}/v1.0/alpha-channel-base64", json=payload, timeout=30
             )
@@ -180,6 +190,8 @@ class StudioAPI:
                 raise APIError(f"API request failed: {error_msg}")
 
             # Decode response
+            if progress_callback:
+                progress_callback(0.7)
             result_data = response.json()
 
             if "alpha_base64" not in result_data:
@@ -189,6 +201,8 @@ class StudioAPI:
                 )
 
             # Decode alpha channel
+            if progress_callback:
+                progress_callback(0.8)
             alpha_image = self._decode_image(result_data["alpha_base64"])
 
             # Resize alpha channel back to original dimensions if needed
@@ -198,7 +212,14 @@ class StudioAPI:
                 )
 
             # Apply alpha channel to original image locally
-            return self._apply_alpha_channel(original_image, alpha_image)
+            if progress_callback:
+                progress_callback(0.9)
+            result = self._apply_alpha_channel(original_image, alpha_image)
+            
+            if progress_callback:
+                progress_callback(1.0)
+            
+            return result
 
         except requests.RequestException as e:
             raise APIError(f"Network error: {str(e)}") from e

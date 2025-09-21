@@ -211,7 +211,7 @@ print(usage)
 ## 🤗 Hugging Face
 
 Find our models on Hugging Face:
-- **[withoutbg/snap](https://huggingface.co/withoutbg/snap)** - Open source Snap model
+- **[withoutbg/focus](https://huggingface.co/withoutbg/open_source)** - Our best open source model
 
 
 ## 📄 License

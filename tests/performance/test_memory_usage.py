@@ -11,7 +11,7 @@ import pytest
 from PIL import Image
 
 from withoutbg.core import remove_background, remove_background_batch
-from withoutbg.models import SnapModel
+from withoutbg.models import OpenSourceModel
 
 
 def get_memory_usage():
@@ -49,8 +49,8 @@ class TestMemoryUsage:
 
         test_image = Image.new("RGB", (1024, 768), color=(128, 64, 192))
 
-        with patch("withoutbg.models.SnapModel._matting_stage") as mock_matting:
-            with patch("withoutbg.models.SnapModel._refiner_stage") as mock_refiner:
+        with patch("withoutbg.models.OpenSourceModel._matting_stage") as mock_matting:
+            with patch("withoutbg.models.OpenSourceModel._refiner_stage") as mock_refiner:
                 mock_alpha = Image.new("L", (1024, 768), color=128)
                 mock_matting.return_value = mock_alpha
                 mock_refiner.return_value = mock_alpha
@@ -90,8 +90,8 @@ class TestMemoryUsage:
         # Create large image
         large_image = Image.new("RGB", (2048, 1536), color=(100, 150, 200))
 
-        with patch("withoutbg.models.SnapModel._matting_stage") as mock_matting:
-            with patch("withoutbg.models.SnapModel._refiner_stage") as mock_refiner:
+        with patch("withoutbg.models.OpenSourceModel._matting_stage") as mock_matting:
+            with patch("withoutbg.models.OpenSourceModel._refiner_stage") as mock_refiner:
                 mock_alpha = Image.new("L", (2048, 1536), color=128)
                 mock_matting.return_value = mock_alpha
                 mock_refiner.return_value = mock_alpha
@@ -173,8 +173,8 @@ class TestMemoryUsage:
         for i in range(5):
             test_image = Image.new("RGB", (512, 384), color=(i * 50, i * 30, i * 20))
 
-            with patch("withoutbg.models.SnapModel._matting_stage") as mock_matting:
-                with patch("withoutbg.models.SnapModel._refiner_stage") as mock_refiner:
+            with patch("withoutbg.models.OpenSourceModel._matting_stage") as mock_matting:
+                with patch("withoutbg.models.OpenSourceModel._refiner_stage") as mock_refiner:
                     mock_alpha = Image.new("L", (512, 384), color=128)
                     mock_matting.return_value = mock_alpha
                     mock_refiner.return_value = mock_alpha
@@ -215,7 +215,7 @@ class TestMemoryUsage:
                 mock_session.return_value = Mock()
 
                 # Initialize model
-                model = SnapModel()
+                model = OpenSourceModel()
 
                 post_init_memory = get_memory_usage()
                 memory_increase = post_init_memory - initial_memory
@@ -238,7 +238,7 @@ class TestMemoryUsage:
         initial_memory = get_memory_usage()
 
         test_image = Image.new("RGB", (1024, 768), color=(128, 64, 192))
-        model = SnapModel()
+        model = OpenSourceModel()
 
         # Test preprocessing
         preprocessed = model._preprocess_for_depth(test_image, 518, 518, 14)
@@ -267,8 +267,8 @@ class TestMemoryUsage:
         for _iteration in range(10):
             test_image = Image.new("RGB", (256, 256), color=(100, 150, 200))
 
-            with patch("withoutbg.models.SnapModel._matting_stage") as mock_matting:
-                with patch("withoutbg.models.SnapModel._refiner_stage") as mock_refiner:
+            with patch("withoutbg.models.OpenSourceModel._matting_stage") as mock_matting:
+                with patch("withoutbg.models.OpenSourceModel._refiner_stage") as mock_refiner:
                     mock_alpha = Image.new("L", (256, 256), color=128)
                     mock_matting.return_value = mock_alpha
                     mock_refiner.return_value = mock_alpha
@@ -383,9 +383,9 @@ class TestMemoryUsage:
             test_image.save(tmp_file.name, "JPEG")
 
             try:
-                with patch("withoutbg.models.SnapModel._matting_stage") as mock_matting:
+                with patch("withoutbg.models.OpenSourceModel._matting_stage") as mock_matting:
                     with patch(
-                        "withoutbg.models.SnapModel._refiner_stage"
+                        "withoutbg.models.OpenSourceModel._refiner_stage"
                     ) as mock_refiner:
                         mock_alpha = Image.new("L", (512, 384), color=128)
                         mock_matting.return_value = mock_alpha

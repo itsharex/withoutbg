@@ -300,7 +300,7 @@ class TestStudioAPI:
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "models": ["snap", "studio", "premium"],
+            "models": ["open_source", "studio", "premium"],
             "default": "studio",
         }
         mock_response.raise_for_status.return_value = None

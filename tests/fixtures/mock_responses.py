@@ -84,10 +84,10 @@ def get_mock_api_responses():
         "models_info": {
             "status_code": 200,
             "json": {
-                "models": ["snap", "studio", "premium"],
+                "models": ["open_source", "studio", "premium"],
                 "default": "studio",
                 "features": {
-                    "snap": ["basic_removal"],
+                    "open_source": ["basic_removal"],
                     "studio": ["advanced_removal", "edge_refinement"],
                     "premium": ["ultra_quality", "batch_processing"],
                 },

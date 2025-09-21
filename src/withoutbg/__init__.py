@@ -4,12 +4,12 @@ from .__version__ import __version__
 from .api import StudioAPI
 from .core import remove_background, remove_background_batch
 from .exceptions import APIError, ModelNotFoundError, WithoutBGError
-from .models import SnapModel
+from .models import OpenSourceModel
 
 __all__ = [
     "remove_background",
     "remove_background_batch",
-    "SnapModel",
+    "OpenSourceModel",
     "StudioAPI",
     "WithoutBGError",
     "ModelNotFoundError",

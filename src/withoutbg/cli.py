@@ -26,13 +26,13 @@ from .exceptions import WithoutBGError
     help="API key for Studio service (or set WITHOUTBG_API_KEY env var)",
 )
 @click.option(
-    "--use-api", is_flag=True, help="Use Studio API instead of local Snap model"
+    "--use-api", is_flag=True, help="Use API instead of local Open Source model"
 )
 @click.option(
     "--model",
-    default="snap",
-    type=click.Choice(["snap", "studio"]),
-    help="Model to use (snap=local, studio=API)",
+    default="opensource",
+    type=click.Choice(["opensource", "api"]),
+    help="Model to use (opensource=local, api=API)",
 )
 @click.option(
     "--batch",
@@ -69,10 +69,10 @@ def main(
 
     Examples:
 
-        # Process single image with local Snap model
+        # Process single image with local Open Source model
         withoutbg image.jpg
 
-        # Use Studio API for best quality processing
+        # Use API for best quality processing
         withoutbg image.jpg --use-api --api-key sk_...
 
         # Process all images in directory
@@ -84,20 +84,20 @@ def main(
 
     try:
         # Determine if using API
-        using_api = use_api or api_key or model == "studio"
+        using_api = use_api or api_key or model == "api"
 
         if using_api and not api_key:
-            click.echo("Error: API key required when using Studio service", err=True)
+            click.echo("Error: API key required when using API service", err=True)
             click.echo(
                 "Set WITHOUTBG_API_KEY environment variable or use --api-key", err=True
             )
             sys.exit(1)
 
         # Configure model
-        actual_model = "studio" if using_api else "snap"
+        actual_model = "api" if using_api else "opensource"
 
         if verbose:
-            mode = "Studio API" if using_api else "Local Snap model"
+            mode = "API" if using_api else "Local Open Source model"
             click.echo(f"Using {mode} for processing...")
 
         # Process images
@@ -147,11 +147,22 @@ def _process_single(
         click.echo(f"Processing: {input_path}")
         click.echo(f"Output: {output_path}")
 
-    # Remove background
+    # Remove background with progress tracking
     bar: ProgressBar
-    with click.progressbar(length=1, label="Removing background") as bar:
-        result = remove_background(input_path, api_key=api_key, model_name=model)
-        bar.update(1)
+    with click.progressbar(length=100, label="Removing background") as bar:
+        def progress_callback(progress: float) -> None:
+            """Update progress bar with progress information."""
+            # Update to the target progress position
+            target_pos = int(progress * 100)
+            if target_pos > bar.pos:
+                bar.update(target_pos - bar.pos)
+        
+        result = remove_background(
+            input_path, 
+            api_key=api_key, 
+            model_name=model,
+            progress_callback=progress_callback
+        )
 
     # Save result
     save_kwargs: dict[str, Any] = {}

@@ -63,7 +63,7 @@ class TestCLIUnit:
         """Test model option accepts only valid choices."""
         with tempfile.NamedTemporaryFile(suffix=".jpg") as temp_file:
             # Valid choice
-            result = self.runner.invoke(main, [temp_file.name, "--model", "snap"])
+            result = self.runner.invoke(main, [temp_file.name, "--model", "opensource"])
             # Should fail because of processing, not validation
             assert "Invalid value" not in result.output
 
@@ -174,8 +174,8 @@ class TestCLIIntegration:
         return images_dir
 
     @patch("src.withoutbg.cli.remove_background")
-    def test_single_image_processing_snap_model(self, mock_remove_bg, test_image_file):
-        """Test processing single image with Snap model."""
+    def test_single_image_processing_open_source_model(self, mock_remove_bg, test_image_file):
+        """Test processing single image with local opensource model."""
         # Mock successful processing
         result_image = Image.new("RGBA", (256, 256), color=(255, 0, 0, 128))
         mock_remove_bg.return_value = result_image
@@ -183,9 +183,12 @@ class TestCLIIntegration:
         result = self.runner.invoke(main, [str(test_image_file)])
 
         assert result.exit_code == 0
-        mock_remove_bg.assert_called_once_with(
-            test_image_file, api_key=None, model_name="snap"
-        )
+        mock_remove_bg.assert_called_once()
+        call_args = mock_remove_bg.call_args
+        assert call_args[0][0] == test_image_file
+        assert call_args[1]["api_key"] is None
+        assert call_args[1]["model_name"] == "opensource"
+        assert "progress_callback" in call_args[1]
 
     @patch("src.withoutbg.cli.remove_background")
     def test_single_image_processing_with_output_path(
@@ -205,22 +208,25 @@ class TestCLIIntegration:
 
     @patch("src.withoutbg.cli.remove_background")
     def test_single_image_processing_studio_api(self, mock_remove_bg, test_image_file):
-        """Test processing with Studio API."""
+        """Test processing with API model."""
         result_image = Image.new("RGBA", (256, 256), color=(255, 0, 0, 128))
         mock_remove_bg.return_value = result_image
 
         result = self.runner.invoke(
-            main, [str(test_image_file), "--model", "studio", "--api-key", "test_key"]
+            main, [str(test_image_file), "--model", "api", "--api-key", "test_key"]
         )
 
         assert result.exit_code == 0
-        mock_remove_bg.assert_called_once_with(
-            test_image_file, api_key="test_key", model_name="studio"
-        )
+        mock_remove_bg.assert_called_once()
+        call_args = mock_remove_bg.call_args
+        assert call_args[0][0] == test_image_file
+        assert call_args[1]["api_key"] == "test_key"
+        assert call_args[1]["model_name"] == "api"
+        assert "progress_callback" in call_args[1]
 
     @patch("src.withoutbg.cli.remove_background")
     def test_use_api_flag_forces_studio_model(self, mock_remove_bg, test_image_file):
-        """Test that --use-api flag forces Studio model."""
+        """Test that --use-api flag forces API model."""
         result_image = Image.new("RGBA", (256, 256), color=(255, 0, 0, 128))
         mock_remove_bg.return_value = result_image
 
@@ -229,9 +235,12 @@ class TestCLIIntegration:
         )
 
         assert result.exit_code == 0
-        mock_remove_bg.assert_called_once_with(
-            test_image_file, api_key="test_key", model_name="studio"
-        )
+        mock_remove_bg.assert_called_once()
+        call_args = mock_remove_bg.call_args
+        assert call_args[0][0] == test_image_file
+        assert call_args[1]["api_key"] == "test_key"
+        assert call_args[1]["model_name"] == "api"
+        assert "progress_callback" in call_args[1]
 
     @patch("src.withoutbg.cli.remove_background")
     def test_batch_processing_directory(
@@ -326,7 +335,7 @@ class TestCLIIntegration:
         result = self.runner.invoke(main, [str(test_image_file), "--verbose"])
 
         assert result.exit_code == 0
-        assert "Using Local Snap model" in result.output
+        assert "Using Local Open Source model for processing" in result.output
         assert "Processing:" in result.output
         assert "✅ Processing complete!" in result.output
 
@@ -342,7 +351,7 @@ class TestCLIIntegration:
         )
 
         assert result.exit_code == 0
-        assert "Using Studio API" in result.output
+        assert "Using API for processing" in result.output
 
     def test_output_filename_generation(self, test_image_file, temp_dir):
         """Test automatic output filename generation."""

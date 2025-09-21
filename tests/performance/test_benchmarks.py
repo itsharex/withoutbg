@@ -9,7 +9,7 @@ import pytest
 from PIL import Image
 
 from withoutbg.core import remove_background, remove_background_batch
-from withoutbg.models import SnapModel
+from withoutbg.models import OpenSourceModel
 
 
 @pytest.fixture
@@ -54,8 +54,8 @@ class TestProcessingBenchmarks:
         """Benchmark processing time for small images."""
         image = benchmark_images["256x256"]
 
-        with patch("withoutbg.models.SnapModel._matting_stage") as mock_matting:
-            with patch("withoutbg.models.SnapModel._refiner_stage") as mock_refiner:
+        with patch("withoutbg.models.OpenSourceModel._matting_stage") as mock_matting:
+            with patch("withoutbg.models.OpenSourceModel._refiner_stage") as mock_refiner:
                 mock_alpha = Image.new("L", (256, 256), color=128)
                 mock_matting.return_value = mock_alpha
                 mock_refiner.return_value = mock_alpha
@@ -78,8 +78,8 @@ class TestProcessingBenchmarks:
         """Benchmark processing time for medium images."""
         image = benchmark_images["512x512"]
 
-        with patch("withoutbg.models.SnapModel._matting_stage") as mock_matting:
-            with patch("withoutbg.models.SnapModel._refiner_stage") as mock_refiner:
+        with patch("withoutbg.models.OpenSourceModel._matting_stage") as mock_matting:
+            with patch("withoutbg.models.OpenSourceModel._refiner_stage") as mock_refiner:
                 mock_alpha = Image.new("L", (512, 512), color=128)
                 mock_matting.return_value = mock_alpha
                 mock_refiner.return_value = mock_alpha
@@ -101,8 +101,8 @@ class TestProcessingBenchmarks:
         """Benchmark processing time for large images."""
         image = benchmark_images["1024x768"]
 
-        with patch("withoutbg.models.SnapModel._matting_stage") as mock_matting:
-            with patch("withoutbg.models.SnapModel._refiner_stage") as mock_refiner:
+        with patch("withoutbg.models.OpenSourceModel._matting_stage") as mock_matting:
+            with patch("withoutbg.models.OpenSourceModel._refiner_stage") as mock_refiner:
                 mock_alpha = Image.new("L", (1024, 768), color=128)
                 mock_matting.return_value = mock_alpha
                 mock_refiner.return_value = mock_alpha
@@ -124,8 +124,8 @@ class TestProcessingBenchmarks:
         """Benchmark processing time for extra large images."""
         image = benchmark_images["2048x1536"]
 
-        with patch("withoutbg.models.SnapModel._matting_stage") as mock_matting:
-            with patch("withoutbg.models.SnapModel._refiner_stage") as mock_refiner:
+        with patch("withoutbg.models.OpenSourceModel._matting_stage") as mock_matting:
+            with patch("withoutbg.models.OpenSourceModel._refiner_stage") as mock_refiner:
                 mock_alpha = Image.new("L", (2048, 1536), color=128)
                 mock_matting.return_value = mock_alpha
                 mock_refiner.return_value = mock_alpha
@@ -182,7 +182,7 @@ class TestProcessingBenchmarks:
 
                 # Measure initialization time
                 start_time = time.time()
-                model = SnapModel()
+                model = OpenSourceModel()
                 end_time = time.time()
 
                 init_time = end_time - start_time
@@ -196,7 +196,7 @@ class TestProcessingBenchmarks:
     def test_preprocessing_performance(self, benchmark_images, mock_onnx_setup):
         """Benchmark preprocessing performance."""
         image = benchmark_images["1024x768"]
-        model = SnapModel()
+        model = OpenSourceModel()
 
         # Measure preprocessing time
         start_time = time.time()
@@ -214,7 +214,7 @@ class TestProcessingBenchmarks:
     def test_depth_estimation_performance(self, benchmark_images, mock_onnx_setup):
         """Benchmark depth estimation performance."""
         image = benchmark_images["512x512"]
-        model = SnapModel()
+        model = OpenSourceModel()
 
         # Measure depth estimation time
         start_time = time.time()
@@ -240,8 +240,8 @@ class TestProcessingBenchmarks:
         processing_times = []
 
         for image in test_images:
-            with patch("withoutbg.models.SnapModel._matting_stage") as mock_matting:
-                with patch("withoutbg.models.SnapModel._refiner_stage") as mock_refiner:
+            with patch("withoutbg.models.OpenSourceModel._matting_stage") as mock_matting:
+                with patch("withoutbg.models.OpenSourceModel._refiner_stage") as mock_refiner:
                     mock_alpha = Image.new("L", (256, 256), color=128)
                     mock_matting.return_value = mock_alpha
                     mock_refiner.return_value = mock_alpha
@@ -322,8 +322,8 @@ class TestScalabilityBenchmarks:
 
             test_image = Image.new("RGB", size, color=(100, 150, 200))
 
-            with patch("withoutbg.models.SnapModel._matting_stage") as mock_matting:
-                with patch("withoutbg.models.SnapModel._refiner_stage") as mock_refiner:
+            with patch("withoutbg.models.OpenSourceModel._matting_stage") as mock_matting:
+                with patch("withoutbg.models.OpenSourceModel._refiner_stage") as mock_refiner:
                     mock_alpha = Image.new("L", size, color=128)
                     mock_matting.return_value = mock_alpha
                     mock_refiner.return_value = mock_alpha
@@ -393,8 +393,8 @@ class TestScalabilityBenchmarks:
 
         # Process same image multiple times
         for _i in range(10):
-            with patch("withoutbg.models.SnapModel._matting_stage") as mock_matting:
-                with patch("withoutbg.models.SnapModel._refiner_stage") as mock_refiner:
+            with patch("withoutbg.models.OpenSourceModel._matting_stage") as mock_matting:
+                with patch("withoutbg.models.OpenSourceModel._refiner_stage") as mock_refiner:
                     mock_alpha = Image.new("L", (512, 384), color=128)
                     mock_matting.return_value = mock_alpha
                     mock_refiner.return_value = mock_alpha
@@ -433,8 +433,8 @@ class TestRegressionBenchmarks:
         """Test against baseline performance to catch regressions."""
         test_image = Image.new("RGB", (512, 512), color=(128, 64, 192))
 
-        with patch("withoutbg.models.SnapModel._matting_stage") as mock_matting:
-            with patch("withoutbg.models.SnapModel._refiner_stage") as mock_refiner:
+        with patch("withoutbg.models.OpenSourceModel._matting_stage") as mock_matting:
+            with patch("withoutbg.models.OpenSourceModel._refiner_stage") as mock_refiner:
                 mock_alpha = Image.new("L", (512, 512), color=128)
                 mock_matting.return_value = mock_alpha
                 mock_refiner.return_value = mock_alpha

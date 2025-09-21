@@ -25,12 +25,12 @@ class TestCLIE2E:
         return output_dir
 
     @pytest.mark.real_processing
-    def test_e2e_single_image_snap_model(self, real_test_image_path, temp_output_dir):
+    def test_e2e_single_image_open_source_model(self, real_test_image_path, temp_output_dir):
         """Test end-to-end processing of single image with Snap model."""
         if not real_test_image_path.exists():
             pytest.skip("Real test image not available")
 
-        output_path = temp_output_dir / "output_snap.png"
+        output_path = temp_output_dir / "output_open_source.png"
 
         result = self.runner.invoke(
             main, [str(real_test_image_path), "--output", str(output_path), "--verbose"]
@@ -330,51 +330,51 @@ class TestCLIE2E:
         if not real_test_image_path.exists():
             pytest.skip("Real test image not available")
 
-        # Test Snap model
-        snap_output = temp_output_dir / "snap_result.png"
-        result_snap = self.runner.invoke(
+        # Test opensource model
+        opensource_output = temp_output_dir / "opensource_result.png"
+        result_opensource = self.runner.invoke(
             main,
             [
                 str(real_test_image_path),
                 "--output",
-                str(snap_output),
+                str(opensource_output),
                 "--model",
-                "snap",
+                "opensource",
             ],
         )
 
-        assert result_snap.exit_code == 0, "Snap model processing failed"
-        assert snap_output.exists(), "Snap model output not created"
+        assert result_opensource.exit_code == 0, "Opensource model processing failed"
+        assert opensource_output.exists(), "Opensource model output not created"
 
-        # Test Studio API if available
+        # Test API model if available
         api_key = os.getenv("WITHOUTBG_API_KEY")
         if api_key:
-            studio_output = temp_output_dir / "studio_result.png"
-            result_studio = self.runner.invoke(
+            api_output = temp_output_dir / "api_result.png"
+            result_api = self.runner.invoke(
                 main,
                 [
                     str(real_test_image_path),
                     "--output",
-                    str(studio_output),
+                    str(api_output),
                     "--model",
-                    "studio",
+                    "api",
                     "--api-key",
                     api_key,
                 ],
             )
 
-            assert result_studio.exit_code == 0, "Studio API processing failed"
-            assert studio_output.exists(), "Studio API output not created"
+            assert result_api.exit_code == 0, "API processing failed"
+            assert api_output.exists(), "API output not created"
 
             # Compare basic properties
-            snap_image = Image.open(snap_output)
-            studio_image = Image.open(studio_output)
+            opensource_image = Image.open(opensource_output)
+            api_image = Image.open(api_output)
 
             assert (
-                snap_image.size == studio_image.size
+                opensource_image.size == api_image.size
             ), "Both models should produce same size output"
             assert (
-                snap_image.mode == studio_image.mode == "RGBA"
+                opensource_image.mode == api_image.mode == "RGBA"
             ), "Both should produce RGBA output"
 
 
@@ -484,7 +484,7 @@ class TestCLIE2EPerformance:
 
     @pytest.mark.performance
     @pytest.mark.real_processing
-    def test_e2e_processing_time_snap_model(
+    def test_e2e_processing_time_open_source_model(
         self, real_test_image_path, temp_output_dir, performance_tracker
     ):
         """Test processing time for Snap model."""
@@ -503,7 +503,7 @@ class TestCLIE2EPerformance:
 
         processing_time = end_time - start_time
         performance_tracker.record_metric(
-            "snap_processing_time", processing_time, "seconds"
+            "open_source_processing_time", processing_time, "seconds"
         )
 
         assert result.exit_code == 0
@@ -512,7 +512,7 @@ class TestCLIE2EPerformance:
         # Snap model should process reasonably quickly
         # This is generous since it includes model download time on first run
         performance_tracker.assert_performance(
-            "snap_processing_time",
+            "open_source_processing_time",
             30.0,  # 30 seconds max
             "Snap model processing took too long",
         )
