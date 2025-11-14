@@ -40,23 +40,9 @@ Need fastest processing? → withoutBG Pro (optimized infrastructure)
 
 **[View Complete Dockerized Web App Documentation →](https://withoutbg.com/documentation/integrations/dockerized-web-app?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
 
+![Web Applicacation in Docker](/images/dockerized-app.png)
 ```bash
-# Clone and start the web application
-git clone https://github.com/withoutbg/withoutbg.git
-cd withoutbg
-
-# Development mode with hot-reload
-docker compose -f apps/web/docker-compose.yml up
-
-# Open in browser
-open http://localhost:3000
-```
-
-Or run production image:
-```bash
-# Build and run production image
-docker build -f apps/web/Dockerfile -t withoutbg:latest .
-docker run -p 80:80 withoutbg:latest
+docker run -p 80:80 withoutbg/app:latest
 
 # Open in browser
 open http://localhost
