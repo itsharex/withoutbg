@@ -56,7 +56,7 @@ Use this checklist when releasing a new version of `withoutbg/app` to Docker Hub
 
 - [ ] Update version references in documentation
 - [ ] Verify Docker Hub README is up to date
-- [ ] Check that DOCKER_RELEASE.md reflects current process
+- [ ] Check that documentation reflects current process
 
 ---
 
@@ -316,10 +316,9 @@ docker buildx rm withoutbg-builder
 
 ## Related Documents
 
-- [DOCKER_RELEASE.md](./DOCKER_RELEASE.md) - Quick start guide
-- [MULTI_PLATFORM_DOCKER.md](./MULTI_PLATFORM_DOCKER.md) - Technical details
-- [EXEC_FORMAT_ERROR_FIX.md](./EXEC_FORMAT_ERROR_FIX.md) - User troubleshooting
-- [ARCHITECTURE_COMPATIBILITY.md](../ARCHITECTURE_COMPATIBILITY.md) - Architecture guide
+- [AUTOMATED_RELEASES.md](./AUTOMATED_RELEASES.md) - Automated release guide (recommended)
+- [DOCKER_CI_SETUP.md](./DOCKER_CI_SETUP.md) - CI/CD setup and manual release option
+- [Commit Convention](../.github/COMMIT_CONVENTION.md) - How to write commit messages
 
 ---
 
